@@ -8,11 +8,6 @@ import { ContactComponent } from '../contact/contact.component';
 
 export const ROUTES: Routes = [
     {
-        path: '',
-        redirectTo: 'home',
-        pathMatch: 'full'
-    },
-    {
         path: 'home',
         component: HomeComponent
     },
@@ -21,11 +16,20 @@ export const ROUTES: Routes = [
         component: ContactComponent
     },
     {
-        path: 'dishdetail/:id',
-        component: DishdetailComponent
+        path: 'aboutus',
+        component: AboutComponent
     },
     {
         path: 'menu',
         component: MenuComponent
-    }
+    },
+    {
+        path: 'dishdetail/:id',
+        component: DishdetailComponent
+    },
+    {
+        path: '',
+        redirectTo: 'home',
+        pathMatch: 'full'
+    },
 ];
