@@ -21,6 +21,10 @@ export const ROUTES: Routes = [
         component: ContactComponent
     },
     {
+        path: 'dishdetail/:id',
+        component: DishdetailComponent
+    },
+    {
         path: 'menu',
         component: MenuComponent
     }
