@@ -25,6 +25,10 @@
                 </mat-card-actions>
             </mat-card>
         </div>
+        <div [hidden]="dish">
+            <mat-spinner color="accent"></mat-spinner>
+            <h4>Loading . . . Please wait</h4>
+        </div>
     </div>
 
     <div fxFlex="40">
@@ -37,6 +41,10 @@
                     <p mat-line>-- {{comment.author}} {{comment.date | date:'mediumDate'}}</p>
                 </mat-list-item>
             </mat-list>
+        </div>
+        <div [hidden]="dish">
+            <mat-spinner color="accent"></mat-spinner>
+            <h4>Loading . . . Please wait</h4>
         </div>
     </div>
 
