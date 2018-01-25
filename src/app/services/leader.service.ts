@@ -6,18 +6,18 @@ import { LEADERS } from '../shared/leaders';
 @Injectable()
 export class LeaderService {
 
-  constructor() { }
+    constructor() { }
 
-  getLeaders(): Leader[] {
-      return LEADERS;
-  }
+    getLeaders(): Promise<Leader[]> {
+        return Promise.resolve(LEADERS);
+    }
 
-  getLeader(id: number): Leader {
-      return LEADERS.filter((leader: Leader) => (leader.id === id))[0];
-  }
+    getLeader(id: number): Promise<Leader> {
+        return Promise.resolve(LEADERS.filter((leader: Leader) => (leader.id === id))[0]);
+    }
 
-  getFeaturedLeader(): Leader {
-      return LEADERS.filter((leader: Leader) => (leader.featured))[0];
-  }
+    getFeaturedLeader(): Promise<Leader> {
+        return Promise.resolve(LEADERS.filter((leader: Leader) => (leader.featured))[0]);
+    }
 
 }
