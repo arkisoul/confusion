@@ -1,4 +1,7 @@
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
+import { of } from 'rxjs/observable/of'
+import 'rxjs/add/operator/delay';
 
 import { Promotion } from '../shared/promotion';
 import { PROMOTIONS } from '../shared/promotions';
@@ -8,25 +11,16 @@ export class PromotionService {
 
     constructor() { }
 
-    getPromotions(): Promise<Promotion[]> {
-        return new Promise(resolve => {
-            // Simulate server latency with 2 seconds delay
-            setTimeout(() => resolve(PROMOTIONS), 2000);
-        });
+    getPromotions(): Observable<Promotion[]> {
+        return of(PROMOTIONS).delay(2000);
     }
 
-    getPromotion(id: number): Promise<Promotion> {
-        return new Promise(resolve => {
-            // Simulate server latency with 2 seconds delay
-            setTimeout(() => resolve(PROMOTIONS.filter((promotion: Promotion) => (promotion.id === id))[0]), 2000);
-        });
+    getPromotion(id: number): Observable<Promotion> {
+        return of(PROMOTIONS.filter((promotion: Promotion) => (promotion.id === id))[0]).delay(2000);
     }
 
-    getFeaturedPromotion(): Promise<Promotion> {
-        return new Promise(resolve => {
-            // Simulate server latency with 2 seconds delay
-            setTimeout(() => resolve(PROMOTIONS.filter((promotion: Promotion) => (promotion.featured))[0]), 2000);
-        });
+    getFeaturedPromotion(): Observable<Promotion> {
+        return of(PROMOTIONS.filter((promotion: Promotion) => (promotion.featured))[0]).delay(2000);
     }
 
 }
