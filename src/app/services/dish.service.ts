@@ -23,4 +23,8 @@ export class DishService {
         return of(DISHES.filter((dish: Dish) => (dish.featured))[0]);
     }
 
+    getDishIds(): Observable<number[]> {
+        return of(DISHES.map(dish => dish.id));
+    }
+
 }
