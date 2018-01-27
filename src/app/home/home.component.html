@@ -2,7 +2,7 @@
      fxLayout="row"
      fxLayout.sm="column"
      fxLayout.xs="column"
-     fxLayoutAlign.gt-md="space-around center"
+     fxLayoutAlign.gt-md="space-around strech"
      fxLayoutGap="10px">
 
     <mat-card *ngIf="featuredDish" fxFlex>
@@ -18,9 +18,13 @@
         </p>
       </mat-card-content>
     </mat-card>
-    <div [hidden]="featuredDish">
+    <div [hidden]="featuredDish || dishErrMess">
         <mat-spinner color="accent"></mat-spinner>
         <h4>Loading . . . Please wait</h4>
+    </div>
+    <div *ngIf="dishErrMess">
+        <h2>Error</h2>
+        <h4>{{dishErrMess}}</h4>
     </div>
 
     <mat-card *ngIf="featuredPromotion" fxFlex>

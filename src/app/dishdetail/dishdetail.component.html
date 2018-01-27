@@ -32,10 +32,6 @@
                 </mat-card-actions>
             </mat-card>
         </div>
-        <div [hidden]="dish">
-            <mat-spinner color="accent"></mat-spinner>
-            <h4>Loading . . . Please wait</h4>
-        </div>
     </div>
 
     <div fxFlex="50">
@@ -56,10 +52,6 @@
                         <p mat-line>-- {{commentForm.get('author').value}}</p>
                     </mat-list-item>
                 </mat-list>
-            </div>
-            <div [hidden]="dish">
-                <mat-spinner color="accent"></mat-spinner>
-                <h4>Loading . . . Please wait</h4>
             </div>
 
             <!-- Comment Form -->
@@ -90,6 +82,15 @@
                 </form>
             </div>
         </div>
+    </div>
+
+    <div [hidden]="dish || errMess">
+        <mat-spinner color="accent"></mat-spinner>
+        <h4>Loading . . . Please wait</h4>
+    </div>
+    <div *ngIf="errMess">
+        <h2>Error</h2>
+        <h4>{{errMess}}</h4>
     </div>
 
 </div>
