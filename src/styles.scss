@@ -20,36 +20,38 @@ $divider-color:        #BDBDBD;
     margin: 0px auto;
     padding: $pad-up-down $pad-left-right;
 }
-
 body {
     padding: 0;
     margin: 0;
     font-family: 'Comfortaa', cursive;
 }
-
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Comfortaa', cursive;
 }
-
 p, span, div {
     font-family: 'Comfortaa', cursive;
 }
-
 .container {
     margin: 20px;
     display: flex;
 }
-
 .background-primary {
     background-color: $background-dark!important;
-  }
+}
 .background-accent {
     background-color: $accent-color!important;
-  }
+}
 .text-floral-white {
     color: floralwhite!important;
 }
-
 .flex-spacer {
   flex: 1 1 auto;
+}
+.highlight {
+    background-color: $background-pale;
+    border: 1px solid $primary-color-dark;
+    z-index: 1;
+    transform: scale(1.02);
+    cursor: pointer;
+    transition: all ease-in 0.4s;
 }
