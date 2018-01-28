@@ -17,6 +17,7 @@ import { DishService } from '../services/dish.service';
 export class DishdetailComponent implements OnInit {
 
     dish: Dish;
+    dishcopy = null;
     dishIds: number[];
     prev: number;
     next: number;
@@ -50,8 +51,8 @@ export class DishdetailComponent implements OnInit {
        this.dishService.getDishIds().subscribe(dishIds => this.dishIds = dishIds);
        this.route.params
          .switchMap((params: Params) => this.dishService.getDish(+params['id']))
-         .subscribe(dish => { this.dish = dish; this.setPrevNext(dish.id); },
-                    errmess => this.errMess = errmess);
+         .subscribe(dish => { this.dish = dish; this.dishcopy = dish; this.setPrevNext(dish.id); },
+                    errmess => { this.dish = null; this.errMess = errmess });
      }
 
      setPrevNext(dishId: number) {
@@ -96,11 +97,10 @@ export class DishdetailComponent implements OnInit {
 
     onSubmit(): void {
         this.comment = this.commentForm.value;
-        let date: Date = new Date();
-        let isoDate: string = date.toISOString();
-        this.comment.date = isoDate;
-        this.dish.comments.push(this.comment);
-        // console.log(this.comment);
+        this.comment.date = new Date().toISOString();
+        this.dishcopy.comments.push(this.comment);
+        this.dishcopy.save()
+            .subscribe(dish => this.dish = dish);
         this.commentForm.reset({
             rating: 5,
             author: '',
