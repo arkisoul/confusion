@@ -2,6 +2,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Params, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { trigger, state, transition, style, animate } from '@angular/animations';
 import 'rxjs/add/operator/switchMap';
 
 import { Dish } from '../shared/dish';
@@ -12,7 +13,20 @@ import { DishService } from '../services/dish.service';
 @Component({
     selector: 'app-dishdetail',
     templateUrl: './dishdetail.component.html',
-    styleUrls: ['./dishdetail.component.scss']
+    styleUrls: ['./dishdetail.component.scss'],
+    animations: [
+        trigger('visibility', [
+            state('shown', style({
+                transform: 'scale(1.0)',
+                opacity: 1
+            })),
+            state('hidden', style({
+                transform: 'scale(0.5)',
+                opacity: 0
+            })),
+            transition('* => *', animate('0.5s ease-in-out'))
+        ])
+    ]
 })
 export class DishdetailComponent implements OnInit {
 
@@ -37,6 +51,7 @@ export class DishdetailComponent implements OnInit {
             'required': 'Comment is required.'
         }
     }
+    visibility: string = 'shown';
 
     constructor(
         private dishService: DishService,
@@ -48,18 +63,18 @@ export class DishdetailComponent implements OnInit {
     }
 
     ngOnInit() {
-       this.dishService.getDishIds().subscribe(dishIds => this.dishIds = dishIds);
-       this.route.params
-         .switchMap((params: Params) => this.dishService.getDish(+params['id']))
-         .subscribe(dish => { this.dish = dish; this.dishcopy = dish; this.setPrevNext(dish.id); },
-                    errmess => { this.dish = null; this.errMess = errmess });
-     }
+        this.dishService.getDishIds().subscribe(dishIds => this.dishIds = dishIds);
+        this.route.params
+            .switchMap((params: Params) => { this.visibility = 'hidden'; return this.dishService.getDish(+params['id']) })
+            .subscribe(dish => { this.dish = dish; this.dishcopy = dish; this.setPrevNext(dish.id); this.visibility = 'shown' },
+            errmess => { this.dish = null; this.errMess = errmess });
+    }
 
-     setPrevNext(dishId: number) {
-       let index:number = this.dishIds.indexOf(dishId);
-       this.prev = this.dishIds[(this.dishIds.length + index - 1)%this.dishIds.length];
-       this.next = this.dishIds[(this.dishIds.length + index + 1)%this.dishIds.length];
-     }
+    setPrevNext(dishId: number) {
+        let index: number = this.dishIds.indexOf(dishId);
+        this.prev = this.dishIds[(this.dishIds.length + index - 1) % this.dishIds.length];
+        this.next = this.dishIds[(this.dishIds.length + index + 1) % this.dishIds.length];
+    }
 
     goBack(): void {
         this.location.back();
@@ -80,15 +95,15 @@ export class DishdetailComponent implements OnInit {
     }
 
     onValueChanged(data?: any): void {
-        if(!this.commentForm) { return; }
+        if (!this.commentForm) { return; }
         const form = this.commentForm;
-        for(const field in this.formErrors) {
+        for (const field in this.formErrors) {
             // Clear form errors (if any)
             this.formErrors[field] = '';
             const control = form.get(field);
             if (control && control.dirty && control.invalid) {
                 const messages = this.validationMessages[field];
-                for(const key in control.errors) {
+                for (const key in control.errors) {
                     this.formErrors[field] = messages[key] + ' ';
                 }
             }
