@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Feedback, ContactType } from '../shared/feedback';
 import { flyInOut } from '../animations/app.animation';
+
+import { FeedbackService } from '../services/feedback.service';
+
+import { Feedback, ContactType } from '../shared/feedback';
 
 @Component({
     selector: 'app-contact',
@@ -19,7 +22,10 @@ export class ContactComponent implements OnInit {
 
     feedbackForm: FormGroup;
     feedback: Feedback;
+    submittedFeedback: Feedback;
+    formSubmitting: boolean = false;
     contactType: string[] = ContactType;
+    errMess: string;
     formErrors: any = {
         'firstname': '',
         'lastname': '',
@@ -48,7 +54,10 @@ export class ContactComponent implements OnInit {
         }
     }
 
-    constructor(private fb: FormBuilder) {
+    constructor(
+        private fb: FormBuilder,
+        private feedbackService: FeedbackService
+    ) {
         this.createForm();
     }
 
@@ -57,7 +66,7 @@ export class ContactComponent implements OnInit {
 
     createForm(): void {
         this.feedbackForm = this.fb.group({
-            firstname: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(25) ]],
+            firstname: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(25)]],
             lastname: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(25)]],
             telnum: [0, [Validators.required, Validators.pattern]],
             email: ['', [Validators.required, Validators.email]],
@@ -77,13 +86,13 @@ export class ContactComponent implements OnInit {
             return;
         }
         const form = this.feedbackForm;
-        for(const field in this.formErrors) {
+        for (const field in this.formErrors) {
             // Clear previous error message (if any)
             this.formErrors[field] = '';
             const control = form.get(field);
             if (control && control.dirty && control.invalid) {
                 const messages = this.validationMessages[field];
-                for(const key in control.errors) {
+                for (const key in control.errors) {
                     this.formErrors[field] += messages[key] + ' ';
                 }
             }
@@ -91,8 +100,12 @@ export class ContactComponent implements OnInit {
     }
 
     onSubmit(): void {
+        this.formSubmitting = true;
         this.feedback = this.feedbackForm.value;
-        console.log(this.feedback);
+        this.feedbackService.submitFeedback(this.feedback)
+            .subscribe(feedback => { this.submittedFeedback = feedback; this.formSubmitting = false; },
+            errmess => this.errMess = errmess);
+
         this.feedbackForm.reset({
             firstname: '',
             lastname: '',

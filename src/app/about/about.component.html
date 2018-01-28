@@ -58,16 +58,20 @@
         <div *ngIf="leaders" [@expand]>
             <mat-list>
                 <mat-list-item *ngFor="let leader of leaders">
-                    <img mat-list-avatar src="{{leader.image}}" alt="{{leader.name}}">
+                    <img mat-list-avatar src="{{BaseURL + leader.image}}" alt="{{leader.name}}">
                     <h3 mat-line>{{leader.name}} {{leader.abbr}}</h3>
                     <p mat-line>{{leader.designation}}</p>
                     <p mat-line>{{leader.description}}</p>
                 </mat-list-item>
             </mat-list>
         </div>
-        <div [hidden]="leaders">
+        <div [hidden]="leaders || errMess">
             <mat-spinner color="accent"></mat-spinner>
             <h4>Loading . . . Please wait</h4>
+        </div>
+        <div *ngIf="errMess">
+            <h2>Error</h2>
+            <h4>{{errMess}}</h4>
         </div>
     </div>
 </div>
