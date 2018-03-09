@@ -1,14 +1,14 @@
-import { Component, OnInit, Inject } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { Params, ActivatedRoute } from '@angular/router';
-import { Location } from '@angular/common';
-import 'rxjs/add/operator/switchMap';
-
+import { Component, OnInit, Inject, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Dish } from '../shared/dish';
 import { Comment } from '../shared/comment';
-
 import { DishService } from '../services/dish.service';
+import { FavoriteService } from '../services/favorite.service';
+
+import { ActivatedRoute, Params } from '@angular/router';
+import { Location } from '@angular/common';
 import { visibility, flyInOut, expand } from '../animations/app.animation';
+import 'rxjs/add/operator/switchMap';
 
 @Component({
     selector: 'app-dishdetail',
@@ -16,107 +16,119 @@ import { visibility, flyInOut, expand } from '../animations/app.animation';
     styleUrls: ['./dishdetail.component.scss'],
     host: {
         '[@flyInOut]': 'true',
-        'style': 'display: block'
+        'style': 'display: block;'
     },
     animations: [
-        visibility(),
         flyInOut(),
+        visibility(),
         expand()
     ]
 })
 export class DishdetailComponent implements OnInit {
 
+    @ViewChild('cform') commentFormDirective;
+
     dish: Dish;
-    dishcopy = null;
-    dishIds: number[];
-    prev: number;
-    next: number;
-    commentForm: FormGroup;
-    comment: Comment;
+    dishIds: String[];
+    prev: String;
+    next: String;
     errMess: string;
-    formErrors: any = {
+    visibility = 'shown';
+    favorite: boolean = false;
+
+    formErrors = {
         'author': '',
         'comment': ''
     };
-    validationMessages: any = {
-        'author': {
-            'required': 'Author name is required.',
-            'minlength': 'Author name must be at least 2 characters long.'
-        },
+
+    validationMessages = {
         'comment': {
             'required': 'Comment is required.'
         }
-    }
-    visibility: string = 'shown';
+    };
 
-    constructor(
-        private dishService: DishService,
+    commentForm: FormGroup;
+
+    constructor(private dishservice: DishService,
+        private favoriteService: FavoriteService,
         private route: ActivatedRoute,
         private location: Location,
         private fb: FormBuilder,
-        @Inject('BaseURL') private BaseURL) {
-        this.createForm();
-    }
+        @Inject('BaseURL') private BaseURL) { }
 
     ngOnInit() {
-        this.dishService.getDishIds().subscribe(dishIds => this.dishIds = dishIds);
+
+        this.createForm();
+
+        this.dishservice.getDishIds().subscribe(dishIds => this.dishIds = dishIds);
         this.route.params
-            .switchMap((params: Params) => { this.visibility = 'hidden'; return this.dishService.getDish(+params['id']) })
-            .subscribe(dish => { this.dish = dish; this.dishcopy = dish; this.setPrevNext(dish.id); this.visibility = 'shown' },
-            errmess => { this.dish = null; this.errMess = errmess });
+            .switchMap((params: Params) => { this.visibility = 'hidden'; return this.dishservice.getDish(params['id']); })
+            .subscribe(dish => {
+                this.dish = dish;
+                this.setPrevNext(dish._id);
+                this.visibility = 'shown';
+                this.favoriteService.isFavorite(this.dish._id)
+                    .subscribe(resp => { console.log(resp); this.favorite = resp.exists; },
+                        err => console.log(err));
+            },
+                errmess => this.errMess = <any>errmess);
     }
 
-    setPrevNext(dishId: number) {
-        let index: number = this.dishIds.indexOf(dishId);
-        this.prev = this.dishIds[(this.dishIds.length + index - 1) % this.dishIds.length];
-        this.next = this.dishIds[(this.dishIds.length + index + 1) % this.dishIds.length];
+    setPrevNext(dishId: String) {
+        if (this.dishIds) {
+            let index = this.dishIds.indexOf(dishId);
+            this.prev = this.dishIds[(this.dishIds.length + index - 1) % this.dishIds.length];
+            this.next = this.dishIds[(this.dishIds.length + index + 1) % this.dishIds.length];
+        }
     }
 
     goBack(): void {
         this.location.back();
     }
 
-    createForm(): void {
+    createForm() {
         this.commentForm = this.fb.group({
             rating: 5,
-            author: ['', [Validators.required, Validators.minLength(2)]],
-            comment: ['', Validators.required],
-            // date: ''
+            comment: ['', Validators.required]
         });
 
         this.commentForm.valueChanges
             .subscribe(data => this.onValueChanged(data));
 
-        this.onValueChanged();
+        this.onValueChanged(); // (re)set validation messages now
     }
 
-    onValueChanged(data?: any): void {
+    onSubmit() {
+        console.log(this.commentForm.value);
+        this.dishservice.postComment(this.dish._id, this.commentForm.value)
+            .subscribe(dish => this.dish = dish);
+        this.commentForm.reset({
+            rating: 5,
+            comment: ''
+        });
+        this.commentFormDirective.resetForm();
+    }
+
+    onValueChanged(data?: any) {
         if (!this.commentForm) { return; }
         const form = this.commentForm;
         for (const field in this.formErrors) {
-            // Clear form errors (if any)
+            // clear previous error message (if any)
             this.formErrors[field] = '';
             const control = form.get(field);
-            if (control && control.dirty && control.invalid) {
+            if (control && control.dirty && !control.valid) {
                 const messages = this.validationMessages[field];
                 for (const key in control.errors) {
-                    this.formErrors[field] = messages[key] + ' ';
+                    this.formErrors[field] += messages[key] + ' ';
                 }
             }
         }
     }
 
-    onSubmit(): void {
-        this.comment = this.commentForm.value;
-        this.comment.date = new Date().toISOString();
-        this.dishcopy.comments.push(this.comment);
-        this.dishcopy.save()
-            .subscribe(dish => this.dish = dish);
-        this.commentForm.reset({
-            rating: 5,
-            author: '',
-            comment: '',
-        });
+    addToFavorites() {
+        console.log("Add to Favorites")
+        if (!this.favorite)
+            this.favoriteService.postFavorite(this.dish._id)
+                .subscribe(favorites => { console.log(favorites); this.favorite = true; });
     }
-
 }
